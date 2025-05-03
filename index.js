@@ -6,20 +6,24 @@ const cors = require('cors');
 const app = express();
 app.use(express.json()); // To parse JSON body
 
-// ✅ Corrected CORS origins (include protocol)
+// ✅ Define specific allowed origins (for production or known IPs)
 const allowedOrigins = [
-  'http://192.168.56.1:51840',
+  'http://192.168.56.1:51840', // example internal IP
   'http://10.1.34.77:3000',
-  'http://localhost:3000',
 ];
 
-// ✅ CORS middleware
+// ✅ CORS middleware with dynamic localhost support
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (
+      !origin || // allow mobile apps, curl, etc.
+      allowedOrigins.includes(origin) ||
+      origin.startsWith('http://localhost') ||
+      origin.startsWith('http://127.0.0.1')
+    ) {
       callback(null, true);
     } else {
-      callback(new Error('CORS policy does not allow access from this origin'));
+      callback(new Error('❌ CORS policy does not allow access from this origin: ' + origin));
     }
   }
 }));
@@ -32,12 +36,11 @@ app.post('/send-email', async (req, res) => {
     return res.status(400).json({ error: 'to, subject, and htmlContent are required' });
   }
 
-  // ✅ Configure transporter
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER, // Your email
-      pass: process.env.EMAIL_PASS, // Your app password (not regular email password)
+      user: process.env.EMAIL_USER, // Your Gmail
+      pass: process.env.EMAIL_PASS, // App-specific password
     },
   });
 
@@ -64,7 +67,7 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Server is running' });
 });
 
-// ✅ Start the server
+// ✅ Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
