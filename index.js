@@ -1,9 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
-
+const cors = require('cors');
 const app = express();
 app.use(express.json()); // To parse JSON body
+
+// ✅ Configure CORS to allow requests from any origin or a specific origin
+// const allowedOrigins = ['http://'];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('CORS policy does not allow access from this origin'));
+//     }
+//   }
+// }));
 
 // POST route to send email
 app.post('/send-email', async (req, res) => {
@@ -36,9 +49,12 @@ app.post('/send-email', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 app.get('/', (req, res) => {
   console.log('GET request received at /');
-})
+  res.status(200).json({});
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
