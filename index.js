@@ -10,6 +10,7 @@ app.use(express.json()); // To parse JSON body
 const allowedOrigins = [
   'http://192.168.56.1:51840',
   'http://10.1.34.77:3000',
+  'http://localhost:3000',
 ];
 
 // ✅ CORS middleware
