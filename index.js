@@ -6,17 +6,17 @@ const app = express();
 app.use(express.json()); // To parse JSON body
 
 // ✅ Configure CORS to allow requests from any origin or a specific origin
-// const allowedOrigins = ['http://'];
+const allowedOrigins = ['http://192.168.56.1:51840'];
 
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('CORS policy does not allow access from this origin'));
-//     }
-//   }
-// }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy does not allow access from this origin'));
+    }
+  }
+}));
 
 // POST route to send email
 app.post('/send-email', async (req, res) => {
