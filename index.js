@@ -2,12 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+
 const app = express();
 app.use(express.json()); // To parse JSON body
 
-// ✅ Configure CORS to allow requests from any origin or a specific origin
-const allowedOrigins = ['http://192.168.56.1:51840'];
+// ✅ Corrected CORS origins (include protocol)
+const allowedOrigins = [
+  'http://192.168.56.1:51840',
+  'http://10.1.34.77:3000',
+];
 
+// ✅ CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -18,7 +23,7 @@ app.use(cors({
   }
 }));
 
-// POST route to send email
+// ✅ Email sender endpoint
 app.post('/send-email', async (req, res) => {
   const { to, subject, htmlContent } = req.body;
 
@@ -26,11 +31,12 @@ app.post('/send-email', async (req, res) => {
     return res.status(400).json({ error: 'to, subject, and htmlContent are required' });
   }
 
+  // ✅ Configure transporter
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: process.env.EMAIL_USER, // Your email
+      pass: process.env.EMAIL_PASS, // Your app password (not regular email password)
     },
   });
 
@@ -43,6 +49,7 @@ app.post('/send-email', async (req, res) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent:', info.response);
     res.status(200).json({ message: '✅ Email sent successfully', info: info.response });
   } catch (err) {
     console.error('❌ Error sending email:', err.message);
@@ -50,12 +57,13 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
+// ✅ Health check route
 app.get('/', (req, res) => {
   console.log('GET request received at /');
-  res.status(200).json({});
+  res.status(200).json({ message: 'Server is running' });
 });
 
-// Start server
+// ✅ Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
